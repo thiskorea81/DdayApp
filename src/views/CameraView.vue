@@ -1,7 +1,7 @@
 <template>
     <div class="camera-view">
       <h1>Camera</h1>
-      <div>
+      <div class="controls">
         <label for="dday-select">Select D-Day:</label>
         <select id="dday-select" v-model="selectedDday">
           <option value="jungwon">정원</option>
@@ -12,9 +12,13 @@
       <div class="dday-info">
         <p>{{ selectedDdayLabel }}: D+{{ selectedDdayValue }}</p>
       </div>
-      <video id="video" width="640" height="480" autoplay></video>
-      <button @click="takePicture">Take Picture</button>
-      <canvas id="canvas" width="640" height="480"></canvas>
+      <video v-if="!captured" id="video" width="640" height="480" autoplay></video>
+      <canvas v-if="captured" id="canvas" width="640" height="480"></canvas>
+      <div class="buttons">
+        <button v-if="!captured" @click="takePicture">Take Picture</button>
+        <button v-if="captured" @click="retakePicture">Retake</button>
+        <button v-if="captured" @click="savePicture">Save</button>
+      </div>
     </div>
   </template>
   
@@ -30,7 +34,8 @@
         selectedDday: 'jungwon',
         video: null,
         canvas: null,
-        context: null
+        context: null,
+        captured: false
       };
     },
     computed: {
@@ -108,6 +113,18 @@
         this.context.lineWidth = 3;
         this.context.strokeText(`${this.selectedDdayLabel}: D+${this.selectedDdayValue}`, 10, 50);
         this.context.fillText(`${this.selectedDdayLabel}: D+${this.selectedDdayValue}`, 10, 50);
+        this.captured = true;
+        this.video.srcObject.getTracks().forEach(track => track.stop());
+      },
+      retakePicture() {
+        this.captured = false;
+        this.setupCamera();
+      },
+      savePicture() {
+        const link = document.createElement('a');
+        link.href = this.canvas.toDataURL('image/png');
+        link.download = 'photo.png';
+        link.click();
       }
     }
   };
@@ -123,12 +140,23 @@
     background: linear-gradient(180deg, #000000, #434343);
     color: white;
     text-align: center;
+    padding: 10px;
+  }
+  .controls {
+    position: relative;
+    z-index: 10;
+    margin-bottom: 10px;
   }
   .dday-info {
     margin-bottom: 10px;
   }
   video, canvas {
     margin-bottom: 10px;
+  }
+  .buttons {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
   }
   button {
     padding: 10px 20px;
@@ -137,6 +165,7 @@
     border: none;
     border-radius: 5px;
     cursor: pointer;
+    margin: 5px;
   }
   button:hover {
     background-color: #0056b3;
