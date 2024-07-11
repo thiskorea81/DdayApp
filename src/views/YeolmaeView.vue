@@ -47,7 +47,7 @@
   }
   
   .result-view h1 {
-    font-size: 5em;
+    font-size: 15em;
     margin: 0;
     color: #6a00ff;
     background: -webkit-linear-gradient(#00f260, #0575e6);
