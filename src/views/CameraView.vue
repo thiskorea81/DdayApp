@@ -75,15 +75,29 @@
         const differenceInDays = today.diff(birthDate, 'days');
         return differenceInDays >= 0 ? differenceInDays + 1 : differenceInDays;
       },
-      setupCamera() {
+      async setupCamera() {
         this.video = document.getElementById('video');
         this.canvas = document.getElementById('canvas');
         this.context = this.canvas.getContext('2d');
         if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-          navigator.mediaDevices.getUserMedia({ video: true }).then((stream) => {
+          try {
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            const videoDevices = devices.filter(device => device.kind === 'videoinput');
+            const rearCamera = videoDevices.find(device => device.label.toLowerCase().includes('back'));
+  
+            const constraints = {
+              video: {
+                deviceId: rearCamera ? { exact: rearCamera.deviceId } : undefined,
+                facingMode: rearCamera ? undefined : { exact: 'environment' }
+              }
+            };
+  
+            const stream = await navigator.mediaDevices.getUserMedia(constraints);
             this.video.srcObject = stream;
             this.video.play();
-          });
+          } catch (error) {
+            console.error('Error accessing the camera: ', error);
+          }
         }
       },
       takePicture() {
