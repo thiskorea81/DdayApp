@@ -3,6 +3,7 @@ import InputView from '../views/InputView.vue';
 import ResultView from '../views/ResultView.vue';
 import JungwonView from '../views/JungwonView.vue';
 import YeolmaeView from '../views/YeolmaeView.vue';
+import CameraView from '../views/CameraView.vue';
 
 const routes = [
   {
@@ -24,6 +25,11 @@ const routes = [
     path: '/yeolmae',
     name: 'Yeolmae',
     component: YeolmaeView
+  },
+  {
+    path: '/camera',
+    name: 'Camera',
+    component: CameraView
   }
 ];
 
