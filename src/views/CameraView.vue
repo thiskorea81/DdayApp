@@ -18,8 +18,10 @@
       <div class="dday-info">
         <p>{{ selectedDdayLabel }}: D+{{ selectedDdayValue }}</p>
       </div>
-      <video v-if="!captured" id="video" width="640" height="480" autoplay></video>
-      <canvas v-if="captured" id="canvas" width="640" height="480"></canvas>
+      <div class="camera-output">
+        <video v-if="!captured" id="video" autoplay></video>
+        <canvas v-if="captured" id="canvas"></canvas>
+      </div>
       <div class="buttons">
         <button v-if="!captured" @click="takePicture">Take Picture</button>
         <button v-if="captured" @click="retakePicture">Retake</button>
@@ -89,39 +91,42 @@
         return differenceInDays >= 0 ? differenceInDays + 1 : differenceInDays;
       },
       async getVideoDevices() {
-        const devices = await navigator.mediaDevices.enumerateDevices();
-        this.videoDevices = devices.filter(device => device.kind === 'videoinput');
-        if (this.videoDevices.length > 0) {
-          this.selectedCameraId = this.videoDevices[0].deviceId;
-          this.setupCamera();
+        try {
+          const devices = await navigator.mediaDevices.enumerateDevices();
+          this.videoDevices = devices.filter(device => device.kind === 'videoinput');
+          if (this.videoDevices.length > 0) {
+            this.selectedCameraId = this.videoDevices[0].deviceId;
+            this.setupCamera();
+          }
+        } catch (error) {
+          console.error('Error accessing video devices: ', error);
         }
       },
       async setupCamera() {
-        this.video = document.getElementById('video');
-        this.canvas = document.getElementById('canvas');
-        this.context = this.canvas.getContext('2d');
-        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-          try {
-            if (this.video.srcObject) {
-              this.video.srcObject.getTracks().forEach(track => track.stop());
-            }
-  
-            const constraints = {
-              video: {
-                deviceId: { exact: this.selectedCameraId }
-              }
-            };
-  
-            const stream = await navigator.mediaDevices.getUserMedia(constraints);
-            this.video.srcObject = stream;
-            this.video.play();
-          } catch (error) {
-            console.error('Error accessing the camera: ', error);
+        try {
+          if (this.video && this.video.srcObject) {
+            this.video.srcObject.getTracks().forEach(track => track.stop());
           }
+          this.video = document.getElementById('video');
+          this.canvas = document.getElementById('canvas');
+          this.context = this.canvas.getContext('2d');
+  
+          const constraints = {
+            video: {
+              deviceId: this.selectedCameraId ? { exact: this.selectedCameraId } : undefined,
+              facingMode: this.selectedCameraId ? undefined : 'environment'
+            }
+          };
+  
+          const stream = await navigator.mediaDevices.getUserMedia(constraints);
+          this.video.srcObject = stream;
+          this.video.play();
+        } catch (error) {
+          console.error('Error setting up camera: ', error);
         }
       },
       takePicture() {
-        this.context.drawImage(this.video, 0, 0, 640, 480);
+        this.context.drawImage(this.video, 0, 0, this.canvas.width, this.canvas.height);
         this.context.font = '40px Arial';
         this.context.fillStyle = 'white';
         this.context.strokeStyle = 'black';
@@ -129,7 +134,9 @@
         this.context.strokeText(`${this.selectedDdayLabel}: D+${this.selectedDdayValue}`, 10, 50);
         this.context.fillText(`${this.selectedDdayLabel}: D+${this.selectedDdayValue}`, 10, 50);
         this.captured = true;
-        this.video.srcObject.getTracks().forEach(track => track.stop());
+        if (this.video.srcObject) {
+          this.video.srcObject.getTracks().forEach(track => track.stop());
+        }
       },
       retakePicture() {
         this.captured = false;
@@ -158,15 +165,23 @@
     padding: 10px;
   }
   .controls {
-    position: relative;
-    z-index: 10;
     margin-bottom: 10px;
   }
   .dday-info {
     margin-bottom: 10px;
   }
-  video, canvas {
+  .camera-output {
+    display: flex;
+    justify-content: center;
     margin-bottom: 10px;
+    width: 100%;
+    height: calc(100vh - 300px); /* Adjust the height to fit buttons and navbar */
+  }
+  video, canvas {
+    width: 100%;
+    height: 100%;
+    border: 2px solid white;
+    object-fit: cover;
   }
   .buttons {
     display: flex;
