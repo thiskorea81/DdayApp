@@ -2,6 +2,12 @@
     <div class="camera-view">
       <h1>Camera</h1>
       <div class="controls">
+        <label for="camera-select">Select Camera:</label>
+        <select id="camera-select" v-model="selectedCameraId" @change="setupCamera">
+          <option v-for="device in videoDevices" :key="device.deviceId" :value="device.deviceId">
+            {{ device.label }}
+          </option>
+        </select>
         <label for="dday-select">Select D-Day:</label>
         <select id="dday-select" v-model="selectedDday">
           <option value="jungwon">정원</option>
@@ -35,7 +41,9 @@
         video: null,
         canvas: null,
         context: null,
-        captured: false
+        captured: false,
+        videoDevices: [],
+        selectedCameraId: ''
       };
     },
     computed: {
@@ -62,7 +70,7 @@
     },
     mounted() {
       this.calculateDdDays();
-      this.setupCamera();
+      this.getVideoDevices();
     },
     methods: {
       calculateDdDays() {
@@ -80,20 +88,27 @@
         const differenceInDays = today.diff(birthDate, 'days');
         return differenceInDays >= 0 ? differenceInDays + 1 : differenceInDays;
       },
+      async getVideoDevices() {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        this.videoDevices = devices.filter(device => device.kind === 'videoinput');
+        if (this.videoDevices.length > 0) {
+          this.selectedCameraId = this.videoDevices[0].deviceId;
+          this.setupCamera();
+        }
+      },
       async setupCamera() {
         this.video = document.getElementById('video');
         this.canvas = document.getElementById('canvas');
         this.context = this.canvas.getContext('2d');
         if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
           try {
-            const devices = await navigator.mediaDevices.enumerateDevices();
-            const videoDevices = devices.filter(device => device.kind === 'videoinput');
-            const rearCamera = videoDevices.find(device => device.label.toLowerCase().includes('back'));
+            if (this.video.srcObject) {
+              this.video.srcObject.getTracks().forEach(track => track.stop());
+            }
   
             const constraints = {
               video: {
-                deviceId: rearCamera ? { exact: rearCamera.deviceId } : undefined,
-                facingMode: rearCamera ? undefined : { exact: 'environment' }
+                deviceId: { exact: this.selectedCameraId }
               }
             };
   
