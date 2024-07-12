@@ -1,5 +1,5 @@
 <template>
-    <div class="camera-view" @keyup.space="handleKeyUp" tabindex="0">
+    <div class="camera-view" @keyup.space="handleKeyUp" @touchstart="handleTouch" tabindex="0">
       <h1>Camera</h1>
       <div class="controls">
         <label for="camera-select">Select Camera:</label>
@@ -163,6 +163,11 @@
         if ((event.key === 'AudioVolumeDown' || event.key === 'AudioVolumeUp') && !this.captured) {
           this.takePicture();
         }
+      },
+      handleTouch(event) {
+        if (!this.captured) {
+          this.takePicture();
+        }
       }
     }
   };
@@ -203,6 +208,8 @@
     display: flex;
     justify-content: space-around;
     width: 100%;
+    position: fixed;
+    bottom: 10px;
   }
   button {
     padding: 10px 20px;
