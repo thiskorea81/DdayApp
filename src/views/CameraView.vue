@@ -208,8 +208,6 @@
     display: flex;
     justify-content: space-around;
     width: 100%;
-    position: fixed;
-    bottom: 10px;
   }
   button {
     padding: 10px 20px;
