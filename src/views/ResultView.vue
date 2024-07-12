@@ -58,7 +58,7 @@
   }
   
   .result-view h1 {
-    font-size: 5em;
+    font-size: 15em;
     margin: 0;
     color: #6a00ff;
     background: -webkit-linear-gradient(#00f260, #0575e6);
@@ -67,7 +67,7 @@
   }
   
   .result-view p {
-    font-size: 2em;
+    font-size: 5em;
     margin: 10px 0 0;
   }
   
@@ -84,5 +84,15 @@
   .result-view button:hover {
     background-color: #cc0000;
   }
+
+  @media (max-width: 600px) {
+  .result-view h1 {
+    font-size: 8em;
+  }
+  
+  .result-view p {
+    font-size: 3em;
+  }
+}
   </style>
   

@@ -56,8 +56,18 @@
   }
   
   .result-view p {
-    font-size: 2em;
+    font-size: 5em;
     margin: 10px 0 0;
   }
+
+  @media (max-width: 600px) {
+  .result-view h1 {
+    font-size: 8em;
+  }
+  
+  .result-view p {
+    font-size: 3em;
+  }
+}
   </style>
   
