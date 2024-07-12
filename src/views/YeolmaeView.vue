@@ -56,7 +56,7 @@
   }
   
   .result-view p {
-    font-size: 5em;
+    font-size: 4em;
     margin: 10px 0 0;
   }
 
